@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Fornecedores.Models
+namespace Prov.Business.Models
 {
     public class Endereco : Entidade
     {

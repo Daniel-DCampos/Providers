@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Prov.App.DTO.FornecedorDTO>
+@using Prov.App.Extensions
 
 @{
     ViewData["Title"] = "Lista de Fornecedores";
@@ -7,11 +8,12 @@
 <h1>@ViewData["Title"]</h1>
 
 <p>
-    <a class="btn btn-info" asp-action="Create">Cadatrar Fornecedor</a>
+    <a class="btn btn-info" asp-action="Create">Cadastrar Fornecedor</a>
 </p>
+  <vc:summary></vc:summary>
 <table class="table table-hover">
     <thead>
-        <tr class="table-dark">
+        <tr class="thead-dark">
             <th>
                 @Html.DisplayNameFor(model => model.Nome)
             </th>
@@ -35,7 +37,7 @@
                     @Html.DisplayFor(modelItem => item.Nome)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Documento)
+                    @this.FormataDocumento(item.TipoFornecedor, item.Documento)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.TipoFornecedor)

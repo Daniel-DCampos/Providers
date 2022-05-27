@@ -19,7 +19,7 @@ namespace Prov.App.DTO
         [StringLength(200, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 2)]
         public string Numero { get; set; }
 
-        public string Complemento { get; set; }
+        public string? Complemento { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [StringLength(8, ErrorMessage = "O campo {0} precisa ter {1} caracteres", MinimumLength = 8)]
@@ -41,6 +41,6 @@ namespace Prov.App.DTO
 
         /*EF Relations*/
 
-        public FornecedorDTO? Fornecedor { get; set; }
+        //public FornecedorDTO? Fornecedor { get; set; }
     }
 }

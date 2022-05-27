@@ -1,4 +1,4 @@
-﻿using Fornecedores.Models;
+﻿using Prov.Business.Models;
 using Microsoft.EntityFrameworkCore;
 using Prov.Business.Interfaces;
 using Prov.Data.Context;

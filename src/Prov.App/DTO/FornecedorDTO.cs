@@ -6,7 +6,6 @@ namespace Prov.App.DTO
 {
     public class FornecedorDTO
     {
-        [Key]
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
@@ -19,7 +18,7 @@ namespace Prov.App.DTO
 
         [DisplayName("TIpo")]
         public int TipoFornecedor { get; set; }
-        public EnderecoDTO Endereco { get; set; }
+        public EnderecoDTO? Endereco { get; set; }
 
         [DisplayName("Ativo?")]
         public bool Atvo { get; set; }

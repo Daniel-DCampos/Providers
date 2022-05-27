@@ -1,4 +1,4 @@
-﻿using Fornecedores.Models;
+﻿using Prov.Business.Models;
 using Microsoft.EntityFrameworkCore;
 using Prov.Business.Interfaces;
 using Prov.Data.Context;
@@ -17,10 +17,19 @@ namespace Prov.Data.Repository
 
         public async Task<Fornecedor> GetFornecedorEndereco(Guid id)
         {
-            return await providersDbContext.Fornecedores
-                .AsNoTracking()
-                .Include(f => f.Endereco)
-                .FirstOrDefaultAsync(f => f.Id == id) ?? new Fornecedor();
+            try
+            {
+                return await providersDbContext.Fornecedores
+                              .AsNoTracking()
+                              .Include(f => f.Endereco)
+                              .FirstOrDefaultAsync(f => f.Id == id) ?? new Fornecedor();
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
         }
 
         public async Task<Fornecedor> GetFornecedorProdutosEndereco(Guid id)

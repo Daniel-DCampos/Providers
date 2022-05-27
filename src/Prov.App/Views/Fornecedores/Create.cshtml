@@ -9,9 +9,11 @@
 <h4>Fornecedor</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <vc:summary></vc:summary>
+
             <div class="form-group">
                 <label asp-for="Nome" class="control-label"></label>
                 <input asp-for="Nome" class="form-control" />
@@ -25,7 +27,7 @@
             <div class="form-group">
                 <label asp-for="TipoFornecedor" class="control-label"></label> <br />
                 <input type="radio" value="1" asp-for="TipoFornecedor" checked /> Pessoa Física <br />
-                <input type="radio" value="2" asp-for="TipoFornecedor"> Pessoa Jurídica 
+                <input type="radio" value="2" asp-for="TipoFornecedor"> Pessoa Jurídica
             </div>
             <br />
             <div class="form-group form-check">
@@ -41,16 +43,20 @@
             <br />
             <div class="form-group">
                 <input type="submit" value="Cadatrar" class="btn btn-primary" />
-                 <a class="btn btn-info" asp-action="Index">Voltar</a>
+                <a class="btn btn-info" asp-action="Index">Voltar</a>
             </div>
         </form>
     </div>
 </div>
 
 <div>
-   
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+<script>
+    BuscaCep();
+</script>
 }

@@ -1,4 +1,4 @@
-﻿namespace Fornecedores.Models
+﻿namespace Prov.Business.Models
 {
     public abstract class Entidade
     {

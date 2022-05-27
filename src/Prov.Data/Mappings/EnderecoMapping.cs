@@ -1,4 +1,4 @@
-﻿using Fornecedores.Models;
+﻿using Prov.Business.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -24,7 +24,6 @@ namespace Prov.Data.Mappings
            .HasColumnType("varchar(10)");
 
             builder.Property(e => e.Complemento)
-           .IsRequired()
            .HasColumnType("varchar(50)");
 
             builder.Property(e => e.Cep)

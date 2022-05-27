@@ -10,27 +10,31 @@ using Prov.App.DTO;
 using Prov.App.Data;
 using Prov.Business.Interfaces;
 using AutoMapper;
-using Fornecedores.Models;
+using Prov.Business.Models;
+using Prov.Business.Services;
+using Prov.Business.Services_Interfaces;
 
 namespace Prov.App.Controllers
 {
     public class FornecedoresController : BaseController
     {
         private readonly IFornecedorRepository _fornecedoreRepository;
+        private readonly IFornecedorService _fornecedorService;
         private readonly IMapper _mapper;
-        public FornecedoresController(IFornecedorRepository fornecedor, IMapper mapper)
+        public FornecedoresController(IFornecedorRepository fornecedor, IEnderecoRepository enderecoRepository, IMapper mapper, IFornecedorService fornecedorService, INotificador notificador) : base(notificador)
         {
             _fornecedoreRepository = fornecedor;
+            _fornecedorService  = fornecedorService;
             _mapper = mapper;
         }
 
-        // GET: Fornecedores
+        [Route("lista-fornecedores")]
         public async Task<IActionResult> Index()
         {
             return View(_mapper.Map<IEnumerable<FornecedorDTO>>(await _fornecedoreRepository.GetAll()));
         }
 
-        // GET: Fornecedores/Details/5
+        [Route("detalhes-fornecedor/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
             var fornecedorDTO = await GetForncecedorEndereco(id);
@@ -42,28 +46,29 @@ namespace Prov.App.Controllers
             return View(fornecedorDTO);
         }
 
-        // GET: Fornecedores/Create
+        [Route("novo-fornecedor")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Fornecedores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Route("novo-fornecedor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(FornecedorDTO fornecedorDTO)
         {
             if (ModelState.IsValid)
             {
-                await _fornecedoreRepository.Add(_mapper.Map<Fornecedor>(fornecedorDTO));
+                await _fornecedorService.Add(_mapper.Map<Fornecedor>(fornecedorDTO));
+                
+                if (!OperacaoValida()) return View(fornecedorDTO);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(fornecedorDTO);
         }
 
-        // GET: Fornecedores/Edit/5
+        [Route("editar-fornecedor/{id:guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {
             var fornecedorDTO = await GetForncecedorProdutosEndereco(id);
@@ -75,6 +80,7 @@ namespace Prov.App.Controllers
             return View(fornecedorDTO);
         }
 
+        [Route("editar-fornecedor/{id:guid}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, FornecedorDTO fornecedorDTO)
@@ -86,13 +92,15 @@ namespace Prov.App.Controllers
 
             if (!ModelState.IsValid) return View(fornecedorDTO);
 
-            await _fornecedoreRepository.Update(_mapper.Map<Fornecedor>(fornecedorDTO));
+            await _fornecedorService.Update(_mapper.Map<Fornecedor>(fornecedorDTO));
+
+            if (!OperacaoValida()) return View(await GetForncecedorProdutosEndereco(id));
 
             return RedirectToAction(nameof(Index));
 
         }
 
-        // GET: Fornecedores/Delete/5
+        [Route("remover-fornecedor/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == null)
@@ -109,29 +117,82 @@ namespace Prov.App.Controllers
             return View(fornecedor);
         }
 
-        // POST: Fornecedores/Delete/5
+        [Route("remover-fornecedor/{id:guid}")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var fornecedorDTO = GetForncecedorEndereco(id);
+            var fornecedorDTO = await GetForncecedorEndereco(id);
             if(fornecedorDTO == null)
             {
                 return NotFound();
             }
-            await _fornecedoreRepository.Delete(id);
+            await _fornecedorService.Remove(id);
+
+            if (!OperacaoValida()) return View(await GetForncecedorProdutosEndereco(id));
+
+            TempData["Sucesso"] = "produto excluído com sucesso!";
 
             return RedirectToAction(nameof(Index));
         }
 
+        [Route("obter-endereco-fornecedor/{id:guid}")]
+        [HttpGet]
+        public async Task<IActionResult> ObterEndereco(Guid id)
+        {
+            var fornecedorDTO = await GetForncecedorEndereco(id);
+
+            if (fornecedorDTO == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_DetalhesEndereco", fornecedorDTO);
+        }
+
+        [Route("atualizar-endereco/{id:guid}")]
+        [HttpGet]
+        public async Task<IActionResult> AtualizarEndereco(Guid id)
+        {
+            var fornecedorDTO = await GetForncecedorEndereco(id);
+
+            if (fornecedorDTO == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_AtualizarEndereco", new FornecedorDTO() { Endereco = fornecedorDTO.Endereco });
+        }
+
+        [Route("atualizar-endereco/{id:guid}")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AtualizarEndereco(FornecedorDTO fornecedorDTO)
+        {
+            ModelState.Remove("Nome");
+            ModelState.Remove("Documento");
+
+            if(!ModelState.IsValid) return PartialView("_AtualizarEndereco", fornecedorDTO);
+
+            await _fornecedorService.AtualizarEndereco(_mapper.Map<Endereco>(fornecedorDTO.Endereco));
+
+            if (!OperacaoValida()) return PartialView("_AtualizarEndereco", fornecedorDTO);
+
+            var url = Url.Action("ObterEndereco", "Fornecedores", new { id = fornecedorDTO.Endereco.FornecedorId });
+
+            return Json(new { success = true, url });
+        }
+
+
+
         private async Task<FornecedorDTO> GetForncecedorEndereco(Guid id)
         {
-            return _mapper.Map<FornecedorDTO>(_fornecedoreRepository.GetFornecedorEndereco(id));
+            return _mapper.Map<FornecedorDTO>(await _fornecedoreRepository.GetFornecedorEndereco(id));
         }
 
         private async Task<FornecedorDTO> GetForncecedorProdutosEndereco(Guid id)
         {
-            return _mapper.Map<FornecedorDTO>(_fornecedoreRepository.GetFornecedorProdutosEndereco(id));
+            return _mapper.Map<FornecedorDTO>(await _fornecedoreRepository.GetFornecedorProdutosEndereco(id));
         }
     }
 }

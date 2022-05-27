@@ -10,7 +10,9 @@ using Prov.App.DTO;
 using Prov.App.Data;
 using Prov.Business.Interfaces;
 using AutoMapper;
-using Fornecedores.Models;
+using Prov.Business.Models;
+using Prov.Business.Services;
+using Prov.Business.Services_Interfaces;
 
 namespace Prov.App.Controllers
 {
@@ -19,20 +21,23 @@ namespace Prov.App.Controllers
 
         private readonly IProdutoRepository _produtoRepository;
         private readonly IFornecedorRepository _fornecedoreRepository;
+        private readonly IProdutoService _produtoService;
         private readonly IMapper _mapper;
-        public ProdutosController(IProdutoRepository produtoRepository, IFornecedorRepository fornecedor, IMapper mapper)
+        public ProdutosController(IProdutoRepository produtoRepository, IFornecedorRepository fornecedor, IMapper mapper, IProdutoService produtoService, INotificador notificador) : base(notificador)
         {
             _produtoRepository = produtoRepository;
             _fornecedoreRepository = fornecedor;
+            _produtoService = produtoService;
             _mapper = mapper;
         }
-        // GET: Produtos
+
+        [Route("lista-produto")]
         public async Task<IActionResult> Index()
         {
             return View(_mapper.Map<IEnumerable<ProdutoDTO>>(await _produtoRepository.GetAllProdutos()));
         }
 
-        // GET: Produtos/Details/5
+        [Route("detalhes-produto/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
             var produtoDTO = await GetProduto(id);
@@ -45,16 +50,14 @@ namespace Prov.App.Controllers
             return View(produtoDTO);
         }
 
-        // GET: Produtos/Create
+        [Route("novo-produto")]
         public async Task<IActionResult> Create()
         {
             ProdutoDTO produto = await PopularFornecedores(new ProdutoDTO());
             return View(produto);
         }
 
-        // POST: Produtos/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Route("novo-produto")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProdutoDTO produtoDTO)
@@ -71,14 +74,16 @@ namespace Prov.App.Controllers
                 return View(produtoDTO);
 
             produtoDTO.imagem = imgPref;
-            await _produtoRepository.Add(_mapper.Map<Produto>(produtoDTO));
+            await _produtoService.Add(_mapper.Map<Produto>(produtoDTO));
+
+            if (!OperacaoValida()) return View(produtoDTO);
 
             return RedirectToAction("Index");
 
         }
 
-       
-        // GET: Produtos/Edit/5
+
+        [Route("editar-produto/{id:guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {
             var produto = await GetProduto(id);
@@ -90,9 +95,7 @@ namespace Prov.App.Controllers
             return View(produto);
         }
 
-        // POST: Produtos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Route("editar-produto/{id:guid}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, ProdutoDTO produtoDTO)
@@ -102,15 +105,36 @@ namespace Prov.App.Controllers
                 return NotFound();
             }
 
+            var produtoAtualizaco = await GetProduto(id);
+            produtoDTO.Fornecedor = produtoAtualizaco.Fornecedor;
+            produtoDTO.imagem = produtoAtualizaco.imagem;
+
             if (!ModelState.IsValid)
                 return View(produtoDTO);
 
-            await _produtoRepository.Update(_mapper.Map<Produto>(produtoDTO));
+            if (produtoDTO.imagemUpload != null)
+            {
+                var imgPref = Guid.NewGuid() + "_" + produtoDTO.imagemUpload.FileName;
+
+                if (!await UploadArquivo(produtoDTO.imagemUpload, imgPref))
+                    return View(produtoDTO);
+
+                produtoAtualizaco.imagem = imgPref; 
+            }
+
+            produtoAtualizaco.Nome = produtoDTO.Nome;
+            produtoAtualizaco.Descricao = produtoDTO.Descricao;
+            produtoAtualizaco.Valor = produtoDTO.Valor;
+            produtoAtualizaco.Ativo = produtoDTO.Ativo;
+
+            await _produtoService.Update(_mapper.Map<Produto>(produtoAtualizaco));
+
+            if (!OperacaoValida()) return View(produtoDTO);
 
             return RedirectToAction("Index");
         }
 
-        // GET: Produtos/Delete/5
+        [Route("remover-produto/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var produto = await GetProduto(id);
@@ -124,7 +148,7 @@ namespace Prov.App.Controllers
             return View(produto);
         }
 
-        // POST: Produtos/Delete/5
+        [Route("remover-produto/{id:guid}")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
@@ -134,7 +158,11 @@ namespace Prov.App.Controllers
             if (produto == null)
                 return NotFound();
 
-            await _produtoRepository.Delete(id);
+            await _produtoService.Remove(id);
+
+            if (!OperacaoValida()) return View(produto);
+
+            TempData["Sucesso"] = "produto excluído com sucesso!";
 
             return RedirectToAction("Index");
         }

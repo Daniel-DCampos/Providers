@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Fornecedores.Models;
+using Prov.Business.Models;
 using Prov.App.DTO;
 
 namespace Prov.App.AutoMapper

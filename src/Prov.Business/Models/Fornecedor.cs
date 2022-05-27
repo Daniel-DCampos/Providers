@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fornecedores.Models
+namespace Prov.Business.Models
 {
     public class Fornecedor : Entidade
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Prov.App.Extensions;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,10 +22,11 @@ namespace Prov.App.DTO
         public string Descricao { get; set; }
 
         [DisplayName("Imagem")]
-        public IFormFile imagemUpload { get; set; }
+        public IFormFile? imagemUpload { get; set; }
 
         public string? imagem { get; set; }
 
+        [Moeda]
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         public decimal Valor { get; set; }
 

@@ -10,5 +10,6 @@ namespace Prov.App.Data
             : base(options)
         {
         }
+        public DbSet<Prov.App.DTO.EnderecoDTO>? EnderecoDTO { get; set; }
     }
 }

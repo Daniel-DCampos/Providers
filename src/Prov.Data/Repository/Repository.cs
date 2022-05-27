@@ -4,9 +4,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using Fornecedores.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Prov.Business.Interfaces;
+using Prov.Business.Models;
 using Prov.Data.Context;
 
 namespace Prov.Data.Repository
@@ -15,6 +16,7 @@ namespace Prov.Data.Repository
     {
         protected readonly ProvidersDbContext providersDbContext;
         protected readonly DbSet<TEntity> dbSet;
+        protected readonly EntityEntry<TEntity> dbEntry;
 
         public Repository(ProvidersDbContext db)
         {
@@ -32,7 +34,7 @@ namespace Prov.Data.Repository
         }
         public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
-            return await dbSet.ToListAsync();
+            return await dbSet.AsNoTracking().ToListAsync();
         }
 
         public virtual async Task Add(TEntity entity)
@@ -49,7 +51,7 @@ namespace Prov.Data.Repository
      
         public virtual async Task Update(TEntity entity)
         {
-            dbSet.Update(entity);
+            providersDbContext.Entry(entity).State = EntityState.Modified;
             await SaveChanges();
         }
         public async Task<int> SaveChanges()

@@ -17,12 +17,12 @@ namespace Prov.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Fornecedores.Models.Endereco", b =>
+            modelBuilder.Entity("Prov.Business.Models.Endereco", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -79,7 +79,7 @@ namespace Prov.Data.Migrations
                     b.ToTable("Enderecos", (string)null);
                 });
 
-            modelBuilder.Entity("Fornecedores.Models.Fornecedor", b =>
+            modelBuilder.Entity("Prov.Business.Models.Fornecedor", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,7 +112,7 @@ namespace Prov.Data.Migrations
                     b.ToTable("Fornecedores", (string)null);
                 });
 
-            modelBuilder.Entity("Fornecedores.Models.Produto", b =>
+            modelBuilder.Entity("Prov.Business.Models.Produto", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -154,19 +154,19 @@ namespace Prov.Data.Migrations
                     b.ToTable("Produtos", (string)null);
                 });
 
-            modelBuilder.Entity("Fornecedores.Models.Endereco", b =>
+            modelBuilder.Entity("Prov.Business.Models.Endereco", b =>
                 {
-                    b.HasOne("Fornecedores.Models.Fornecedor", "Fornecedor")
+                    b.HasOne("Prov.Business.Models.Fornecedor", "Fornecedor")
                         .WithOne("Endereco")
-                        .HasForeignKey("Fornecedores.Models.Endereco", "FornecedorId")
+                        .HasForeignKey("Prov.Business.Models.Endereco", "FornecedorId")
                         .IsRequired();
 
                     b.Navigation("Fornecedor");
                 });
 
-            modelBuilder.Entity("Fornecedores.Models.Produto", b =>
+            modelBuilder.Entity("Prov.Business.Models.Produto", b =>
                 {
-                    b.HasOne("Fornecedores.Models.Fornecedor", "Fornecedor")
+                    b.HasOne("Prov.Business.Models.Fornecedor", "Fornecedor")
                         .WithMany("Produtos")
                         .HasForeignKey("FornecedorId")
                         .IsRequired();
@@ -174,7 +174,7 @@ namespace Prov.Data.Migrations
                     b.Navigation("Fornecedor");
                 });
 
-            modelBuilder.Entity("Fornecedores.Models.Fornecedor", b =>
+            modelBuilder.Entity("Prov.Business.Models.Fornecedor", b =>
                 {
                     b.Navigation("Endereco")
                         .IsRequired();
