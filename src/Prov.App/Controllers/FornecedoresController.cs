@@ -13,9 +13,12 @@ using AutoMapper;
 using Prov.Business.Models;
 using Prov.Business.Services;
 using Prov.Business.Services_Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Prov.App.Extensions;
 
 namespace Prov.App.Controllers
 {
+    [Authorize]
     public class FornecedoresController : BaseController
     {
         private readonly IFornecedorRepository _fornecedoreRepository;
@@ -28,12 +31,14 @@ namespace Prov.App.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [Route("lista-fornecedores")]
         public async Task<IActionResult> Index()
         {
             return View(_mapper.Map<IEnumerable<FornecedorDTO>>(await _fornecedoreRepository.GetAll()));
         }
 
+        [AllowAnonymous]
         [Route("detalhes-fornecedor/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
@@ -46,6 +51,7 @@ namespace Prov.App.Controllers
             return View(fornecedorDTO);
         }
 
+        [ClaimsAuthorize("Fornecedor", "Criar")]
         [Route("novo-fornecedor")]
         public IActionResult Create()
         {
@@ -54,7 +60,6 @@ namespace Prov.App.Controllers
 
         [Route("novo-fornecedor")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(FornecedorDTO fornecedorDTO)
         {
             if (ModelState.IsValid)
@@ -68,6 +73,7 @@ namespace Prov.App.Controllers
             return View(fornecedorDTO);
         }
 
+        [ClaimsAuthorize("Fornecedor", "Editar")]
         [Route("editar-fornecedor/{id:guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -82,7 +88,6 @@ namespace Prov.App.Controllers
 
         [Route("editar-fornecedor/{id:guid}")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, FornecedorDTO fornecedorDTO)
         {
             if (id != fornecedorDTO.Id)
@@ -100,6 +105,7 @@ namespace Prov.App.Controllers
 
         }
 
+        [ClaimsAuthorize("Fornecedor", "Excluir")]
         [Route("remover-fornecedor/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -119,7 +125,7 @@ namespace Prov.App.Controllers
 
         [Route("remover-fornecedor/{id:guid}")]
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var fornecedorDTO = await GetForncecedorEndereco(id);
@@ -166,7 +172,7 @@ namespace Prov.App.Controllers
 
         [Route("atualizar-endereco/{id:guid}")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> AtualizarEndereco(FornecedorDTO fornecedorDTO)
         {
             ModelState.Remove("Nome");

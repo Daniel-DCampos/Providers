@@ -13,9 +13,12 @@ using AutoMapper;
 using Prov.Business.Models;
 using Prov.Business.Services;
 using Prov.Business.Services_Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Prov.App.Extensions;
 
 namespace Prov.App.Controllers
 {
+    [Authorize]
     public class ProdutosController : BaseController
     {
 
@@ -31,12 +34,14 @@ namespace Prov.App.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [Route("lista-produto")]
         public async Task<IActionResult> Index()
         {
             return View(_mapper.Map<IEnumerable<ProdutoDTO>>(await _produtoRepository.GetAllProdutos()));
         }
 
+        [AllowAnonymous]
         [Route("detalhes-produto/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
@@ -50,6 +55,7 @@ namespace Prov.App.Controllers
             return View(produtoDTO);
         }
 
+        [ClaimsAuthorize("Produtos","Criar")]
         [Route("novo-produto")]
         public async Task<IActionResult> Create()
         {
@@ -59,7 +65,7 @@ namespace Prov.App.Controllers
 
         [Route("novo-produto")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> Create(ProdutoDTO produtoDTO)
         {
             produtoDTO = await PopularFornecedores(produtoDTO);
@@ -82,7 +88,7 @@ namespace Prov.App.Controllers
 
         }
 
-
+        [ClaimsAuthorize("Produtos", "Editar")]
         [Route("editar-produto/{id:guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -97,7 +103,7 @@ namespace Prov.App.Controllers
 
         [Route("editar-produto/{id:guid}")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> Edit(Guid id, ProdutoDTO produtoDTO)
         {
             if (id != produtoDTO.id)
@@ -134,6 +140,7 @@ namespace Prov.App.Controllers
             return RedirectToAction("Index");
         }
 
+        [ClaimsAuthorize("Produtos", "Excluir")]
         [Route("remover-produto/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -150,7 +157,7 @@ namespace Prov.App.Controllers
 
         [Route("remover-produto/{id:guid}")]
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var produto = await GetProduto(id);
